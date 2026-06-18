@@ -99,6 +99,16 @@ fig2 = px.bar(
 fig2.update_traces(texttemplate="%{text:.1f}", textposition="outside")
 st.plotly_chart(fig2, use_container_width=True)
 
+def risk_level(p):
+    if p >= 30:
+        return "🔴 High Risk"
+    elif p >= 20:
+        return "🟠 Moderate Risk"
+    else:
+        return "🟢 Low Risk"
+
+filtered_df["Risk Level"] = filtered_df["Prevalence %"].apply(risk_level)
+
 # Trend line
 st.subheader("Stunting Prevalence Trend Over Time")
 
