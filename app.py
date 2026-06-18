@@ -7,13 +7,26 @@ st.set_page_config(page_title="Child Stunting Dashboard", layout="wide")
 st.title("Child Malnutrition (Stunting) in Southeast Asia")
 st.write("Data source: UNICEF-WHO-World Bank Joint Child Malnutrition Estimates (JME)")
 
+# Load data
 df = pd.read_csv("stunting_child_sea.csv")
+
+# Clean data types
+df["Year"] = pd.to_numeric(df["Year"], errors="coerce")
+df["Children Affected(K)"] = pd.to_numeric(df["Children Affected(K)"], errors="coerce")
+df["Prevalence %"] = pd.to_numeric(df["Prevalence %"], errors="coerce")
+
+df = df.dropna(subset=["Year", "Country", "Children Affected(K)", "Prevalence %"])
+df["Year"] = df["Year"].astype(int)
 
 # Sidebar filters
 st.sidebar.header("Filter Data")
 
 years = sorted(df["Year"].unique())
-selected_year = st.sidebar.selectbox("Select Year", years, index=len(years)-1)
+selected_year = st.sidebar.selectbox(
+    "Select Year",
+    years,
+    index=len(years) - 1
+)
 
 countries = sorted(df["Country"].unique())
 selected_countries = st.sidebar.multiselect(
@@ -22,6 +35,7 @@ selected_countries = st.sidebar.multiselect(
     default=countries
 )
 
+# Filter data
 filtered_df = df[
     (df["Year"] == selected_year) &
     (df["Country"].isin(selected_countries))
@@ -30,24 +44,30 @@ filtered_df = df[
 # KPIs
 col1, col2, col3 = st.columns(3)
 
-col1.metric(
-    "Total Children Affected (K)",
-    f"{filtered_df['Children Affected(K)'].sum():,.1f}"
-)
+if not filtered_df.empty:
+    col1.metric(
+        "Total Children Affected (K)",
+        f"{filtered_df['Children Affected(K)'].sum():,.1f}"
+    )
 
-col2.metric(
-    "Average Prevalence (%)",
-    f"{filtered_df['Prevalence %'].mean():.1f}%"
-)
+    col2.metric(
+        "Average Prevalence (%)",
+        f"{filtered_df['Prevalence %'].mean():.1f}%"
+    )
 
-highest = filtered_df.loc[filtered_df["Prevalence %"].idxmax()]
-col3.metric(
-    "Highest Prevalence",
-    f"{highest['Country']} ({highest['Prevalence %']}%)"
-)
+    highest = filtered_df.loc[filtered_df["Prevalence %"].idxmax()]
+    col3.metric(
+        "Highest Prevalence",
+        f"{highest['Country']} ({highest['Prevalence %']:.1f}%)"
+    )
+else:
+    col1.metric("Total Children Affected (K)", "No data")
+    col2.metric("Average Prevalence (%)", "No data")
+    col3.metric("Highest Prevalence", "No data")
 
+# Dataset table
 st.subheader(f"Dataset for {selected_year}")
-st.dataframe(filtered_df, use_container_width=True)
+st.dataframe(filtered_df.reset_index(drop=True), use_container_width=True)
 
 # Bar chart: Prevalence
 st.subheader("Stunting Prevalence by Country")
@@ -60,7 +80,7 @@ fig1 = px.bar(
     title=f"Stunting Prevalence (%) in {selected_year}"
 )
 
-fig1.update_traces(textposition="outside")
+fig1.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
 st.plotly_chart(fig1, use_container_width=True)
 
 # Bar chart: Children affected
@@ -74,11 +94,11 @@ fig2 = px.bar(
     title=f"Children Affected by Stunting (Thousands) in {selected_year}"
 )
 
-fig2.update_traces(textposition="outside")
+fig2.update_traces(texttemplate="%{text:.1f}", textposition="outside")
 st.plotly_chart(fig2, use_container_width=True)
 
 # Trend line
-st.subheader("Stunting Trend Over Time")
+st.subheader("Stunting Prevalence Trend Over Time")
 
 trend_df = df[df["Country"].isin(selected_countries)]
 
@@ -88,7 +108,7 @@ fig3 = px.line(
     y="Prevalence %",
     color="Country",
     markers=True,
-    title="Stunting Prevalence Trend (2022–2024)"
+    title="Stunting Prevalence Trend"
 )
 
 st.plotly_chart(fig3, use_container_width=True)
@@ -96,18 +116,19 @@ st.plotly_chart(fig3, use_container_width=True)
 # Insights
 st.subheader("Key Insights")
 
-if selected_year == 2024:
-    st.write("""
-    - Timor-Leste has the highest stunting prevalence.
-    - Singapore has the lowest stunting prevalence.
-    - Indonesia has the largest number of children affected due to its large population.
-    - Several Southeast Asian countries still have stunting prevalence above 20%.
-    """)
+st.write(f"""
+- The dashboard shows child stunting data for **{selected_year}**.
+- Countries with higher prevalence percentages require stronger nutrition intervention.
+- Countries with larger affected-child numbers may need wider national-scale support.
+- Comparing prevalence and affected numbers helps identify both severity and population impact.
+""")
 
+# Recommendations
 st.subheader("Recommendations")
+
 st.write("""
-- Focus nutrition programs on high-risk countries.
+- Prioritize nutrition programs in countries with high stunting prevalence.
 - Improve maternal and child nutrition support.
-- Use data science to detect high-risk populations early.
-- Monitor stunting trends using dashboards and yearly data.
+- Use yearly data monitoring to track progress.
+- Apply data analysis to identify high-risk countries and guide policy decisions.
 """)
