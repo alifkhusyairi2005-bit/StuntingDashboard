@@ -123,55 +123,6 @@ fig3 = px.line(
 )
 
 st.plotly_chart(fig3, use_container_width=True)
-# Stunting Prediction
-st.subheader("Stunting Prediction for 2026")
-
-prediction_country = st.selectbox(
-    "Select Country for Prediction",
-    countries
-)
-
-country_df = df[df["Country"] == prediction_country].sort_values("Year")
-
-if len(country_df) >= 2:
-    X = country_df["Year"].values.reshape(-1, 1)
-    y = country_df["Prevalence %"].values
-
-    model = LinearRegression()
-    model.fit(X, y)
-
-    pred_2025 = model.predict([[2026]])[0]
-
-    st.metric(
-        f"Predicted Stunting Prevalence in {prediction_country} (2025)",
-        f"{pred_2025:.1f}%"
-    )
-
-    # Create prediction dataframe
-    pred_df = pd.DataFrame({
-        "Year": [2025],
-        "Prevalence %": [pred_2026],
-        "Type": ["Predicted"]
-    })
-
-    actual_df = country_df[["Year", "Prevalence %"]].copy()
-    actual_df["Type"] = "Actual"
-
-    forecast_df = pd.concat([actual_df, pred_df], ignore_index=True)
-
-    fig4 = px.line(
-        forecast_df,
-        x="Year",
-        y="Prevalence %",
-        color="Type",
-        markers=True,
-        title=f"Actual vs Predicted Stunting Prevalence: {prediction_country}"
-    )
-
-    st.plotly_chart(fig4, use_container_width=True)
-
-else:
-    st.warning("Not enough yearly data to make prediction.")
 
 # Insights
 st.subheader("Key Insights")
