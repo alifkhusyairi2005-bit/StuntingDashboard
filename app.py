@@ -67,8 +67,10 @@ else:
 
 # Dataset table
 st.subheader(f"Dataset for {selected_year}")
-st.dataframe(filtered_df.reset_index(drop=True), use_container_width=True)
+display_df = filtered_df.reset_index(drop=True)
+display_df.index = display_df.index + 1
 
+st.dataframe(display_df, use_container_width=True)
 # Bar chart: Prevalence
 st.subheader("Stunting Prevalence by Country")
 
