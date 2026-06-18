@@ -7,7 +7,7 @@ st.set_page_config(page_title="Child Stunting Dashboard", layout="wide")
 st.title("Child Malnutrition (Stunting) in Southeast Asia")
 st.write("Data source: UNICEF-WHO-World Bank Joint Child Malnutrition Estimates (JME)")
 
-df = pd.read_csv("stunting_child_sea(1).csv")
+df = pd.read_csv("stunting_child_sea.csv")
 
 # Sidebar filters
 st.sidebar.header("Filter Data")
