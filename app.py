@@ -40,7 +40,16 @@ filtered_df = df[
     (df["Year"] == selected_year) &
     (df["Country"].isin(selected_countries))
 ]
+def risk_level(prevalence):
+    if prevalence >= 30:
+        return "🔴 High Risk"
+    elif prevalence >= 20:
+        return "🟠 Moderate Risk"
+    else:
+        return "🟢 Low Risk"
 
+filtered_df = filtered_df.copy()
+filtered_df["Risk Level"] = filtered_df["Prevalence %"].apply(risk_level)
 # KPIs
 col1, col2, col3 = st.columns(3)
 
@@ -96,18 +105,7 @@ fig2 = px.bar(
     title=f"Children Affected by Stunting (Thousands) in {selected_year}"
 )
 
-fig2.update_traces(texttemplate="%{text:.1f}", textposition="outside")
-st.plotly_chart(fig2, use_container_width=True)
 
-def risk_level(p):
-    if p >= 30:
-        return "🔴 High Risk"
-    elif p >= 20:
-        return "🟠 Moderate Risk"
-    else:
-        return "🟢 Low Risk"
-
-filtered_df["Risk Level"] = filtered_df["Prevalence %"].apply(risk_level)
 
 # Trend line
 st.subheader("Stunting Prevalence Trend Over Time")
