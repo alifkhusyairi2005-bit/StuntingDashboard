@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from sklearn.linear_model import LinearRegression
+
 
 st.set_page_config(page_title="Child Stunting Dashboard", layout="wide")
 
