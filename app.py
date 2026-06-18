@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-
 st.set_page_config(page_title="Child Stunting Dashboard", layout="wide")
 
 st.title("Child Malnutrition (Stunting) in Southeast Asia")
@@ -41,6 +40,7 @@ filtered_df = df[
     (df["Year"] == selected_year) &
     (df["Country"].isin(selected_countries))
 ]
+
 def risk_level(prevalence):
     if prevalence >= 30:
         return "🔴 High Risk"
@@ -51,6 +51,7 @@ def risk_level(prevalence):
 
 filtered_df = filtered_df.copy()
 filtered_df["Risk Level"] = filtered_df["Prevalence %"].apply(risk_level)
+
 # KPIs
 col1, col2, col3 = st.columns(3)
 
@@ -81,6 +82,7 @@ display_df = filtered_df.reset_index(drop=True)
 display_df.index = display_df.index + 1
 
 st.dataframe(display_df, use_container_width=True)
+
 # Bar chart: Prevalence
 st.subheader("Stunting Prevalence by Country")
 
@@ -92,7 +94,11 @@ fig1 = px.bar(
     title=f"Stunting Prevalence (%) in {selected_year}"
 )
 
-fig1.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+fig1.update_traces(
+    texttemplate="%{text:.1f}%",
+    textposition="outside"
+)
+
 st.plotly_chart(fig1, use_container_width=True)
 
 # Bar chart: Children affected
@@ -106,9 +112,14 @@ fig2 = px.bar(
     title=f"Children Affected by Stunting (Thousands) in {selected_year}"
 )
 
+fig2.update_traces(
+    texttemplate="%{text:,.0f}K",
+    textposition="outside"
+)
 
+st.plotly_chart(fig2, use_container_width=True)
 
-# Trend line
+# Trend line: Prevalence
 st.subheader("Stunting Prevalence Trend Over Time")
 
 trend_df = df[df["Country"].isin(selected_countries)]
@@ -123,6 +134,20 @@ fig3 = px.line(
 )
 
 st.plotly_chart(fig3, use_container_width=True)
+
+# Trend line: Children affected
+st.subheader("Children Affected Trend Over Time")
+
+fig4 = px.line(
+    trend_df,
+    x="Year",
+    y="Children Affected(K)",
+    color="Country",
+    markers=True,
+    title="Children Affected by Stunting Over Time"
+)
+
+st.plotly_chart(fig4, use_container_width=True)
 
 # Insights
 st.subheader("Key Insights")
